@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Tax Savings Analysis</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#eef2f7;color:#1a2744;min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0d1e3f 0%,#1a3468 55%,#1e4d8c 100%);
+  color:#fff;padding:28px 48px;display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.hdr-brand{display:flex;align-items:center;gap:16px}
+.hdr-logo{flex-shrink:0}
+.hdr-l h1{font-size:1.55rem;font-weight:700;letter-spacing:-.5px}
+.hdr-l p{font-size:.85rem;opacity:.6;margin-top:3px}
+.hdr-company{font-size:.78rem;font-weight:800;letter-spacing:.25em;color:#D4A830;text-transform:uppercase;margin-bottom:4px}
+.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.hdr-r label{font-size:.7rem;opacity:.55;text-transform:uppercase;letter-spacing:.09em}
+.client-inp{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);
+  border-radius:8px;color:#fff;font-size:1rem;font-weight:600;padding:7px 14px;width:220px;
+  outline:none;transition:border-color .2s}
+.client-inp::placeholder{color:rgba(255,255,255,.35)}
+.client-inp:focus{border-color:rgba(255,255,255,.75)}
+
+/* ── PRINT HEADER (screen: hidden) ── */
+.print-hdr{display:none}
+
+/* ── MAIN ── */
+.main{max-width:1140px;margin:0 auto;padding:28px 20px 20px}
+.slabel{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em;
+  color:#5a7a9e;margin-bottom:12px;margin-top:4px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(15,33,71,.07);
+  padding:24px 28px;margin-bottom:22px}
+
+/* ── SETUP ROW ── */
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px}
+.fil-wrap{display:flex;flex-direction:column;gap:8px}
+.fil-btn{display:flex;align-items:center;gap:12px;padding:14px 18px;border:2px solid #d8e3ef;
+  border-radius:10px;cursor:pointer;background:#f8fafc;transition:all .18s;user-select:none}
+.fil-btn.active{border-color:#1a3468;background:#eef3fb}
+.fil-btn .ficon{font-size:1.3rem;width:32px;text-align:center}
+.fil-btn .ftitle{font-size:.92rem;font-weight:600;color:#1a2744}
+.fil-btn .fsub{font-size:.74rem;color:#7a9ab8;margin-top:1px}
+.right-setup{display:flex;flex-direction:column;gap:16px}
+.inp-row{display:flex;flex-direction:column;gap:6px}
+.inp-row label{font-size:.72rem;font-weight:700;color:#5a7a9e;text-transform:uppercase;letter-spacing:.07em}
+.inp-row select,.inp-row input{border:1.5px solid #d8e3ef;border-radius:8px;font-size:.93rem;
+  color:#1a2744;padding:9px 13px;outline:none;background:#f8fafc;width:100%;transition:border-color .2s,box-shadow .2s}
+.inp-row select:focus,.inp-row input:focus{border-color:#1a3468;box-shadow:0 0 0 3px rgba(26,52,104,.09);background:#fff}
+.inp-row input::placeholder{color:#b0bec5}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;align-items:center;gap:6px;padding:6px 13px;border:1.5px solid #d8e3ef;
+  border-radius:20px;cursor:pointer;font-size:.82rem;font-weight:500;color:#3a506e;
+  background:#f8fafc;transition:all .17s;user-select:none}
+.chip.active{border-color:#1a3468;background:#eef3fb;color:#1a3468;font-weight:600}
+.chip .cdot{width:8px;height:8px;border-radius:50%;border:2px solid #a0b4cc;transition:all .17s;flex-shrink:0}
+.chip.active .cdot{background:#1a3468;border-color:#1a3468}
+.income-amounts{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:2px}
+.amt-group{display:flex;flex-direction:column;gap:5px}
+.amt-group label{font-size:.73rem;font-weight:600;color:#5a7a9e}
+.amt-group input{border:1.5px solid #d8e3ef;border-radius:7px;padding:8px 11px;
+  font-size:.9rem;color:#1a2744;background:#f8fafc;outline:none;width:100%;transition:border-color .2s}
+.amt-group input:focus{border-color:#1a3468;background:#fff}
+.amt-group input::placeholder{color:#b0bec5}
+
+/* ── S-CORP CARD ── */
+.scorp-card{background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(15,33,71,.07);
+  margin-bottom:22px;overflow:hidden}
+.scorp-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;
+  border-bottom:1px solid transparent;transition:border-color .2s}
+.scorp-card.active .scorp-header{border-bottom-color:#e2eaf3}
+.scorp-title{display:flex;align-items:center;gap:12px}
+.scorp-icon{font-size:1.4rem;width:36px;height:36px;background:#eef3fb;border-radius:8px;
+  display:flex;align-items:center;justify-content:center}
+.scorp-name{font-size:1rem;font-weight:700;color:#1a2744}
+.scorp-desc{font-size:.77rem;color:#7a9ab8;margin-top:2px;max-width:500px}
+.toggle-wrap{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.toggle-label{font-size:.8rem;font-weight:600;color:#5a7a9e;transition:color .2s;min-width:20px}
+.toggle-label.on{color:#1a3468}
+.toggle{position:relative;display:inline-block;width:46px;height:25px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
+  background:#ccd6e8;transition:.25s;border-radius:25px}
+.toggle-slider:before{position:absolute;content:"";height:19px;width:19px;left:3px;bottom:3px;
+  background:#fff;transition:.25s;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle input:checked+.toggle-slider{background:#1a3468}
+.toggle input:checked+.toggle-slider:before{transform:translateX(21px)}
+.scorp-body{padding:20px 24px;display:none}
+.scorp-body.visible{display:block}
+.scorp-inputs{display:flex;align-items:flex-end;gap:20px;margin-bottom:18px}
+.scorp-sal-grp{display:flex;flex-direction:column;gap:6px}
+.scorp-sal-grp label{font-size:.72rem;font-weight:700;color:#5a7a9e;text-transform:uppercase;letter-spacing:.07em}
+.scorp-sal-grp input{border:1.5px solid #d8e3ef;border-radius:8px;font-size:1rem;font-weight:600;
+  color:#1a2744;padding:9px 14px;outline:none;background:#f8fafc;width:200px;transition:border-color .2s}
+.scorp-sal-grp input:focus{border-color:#1a3468;background:#fff}
+.scorp-sal-grp input::placeholder{color:#b0bec5}
+.scorp-note{font-size:.77rem;color:#7a9ab8;line-height:1.55;padding:10px 14px;
+  background:#f8fafc;border-radius:8px;border-left:3px solid #ccd6e8;flex:1}
+.scorp-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.scorp-metric{background:#f8fafc;border-radius:10px;padding:14px 16px;border:1px solid #e8eef8}
+.scorp-metric.highlight{background:linear-gradient(135deg,#eaf7ef,#f0faf5);border-color:#b2dfcb}
+.sm-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7a9ab8;margin-bottom:6px}
+.sm-val{font-size:1.1rem;font-weight:800;color:#1a2744}
+.sm-val.red{color:#c0392b}
+.sm-val.green{color:#1a7a4a;font-size:1.2rem}
+
+/* ── COMPARISON TABLE ── */
+.cmp-table{width:100%;border-collapse:collapse}
+.cmp-table thead tr{background:#f0f4f8}
+.cmp-table thead th{padding:11px 16px;font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:#5a7a9e;text-align:left;border-bottom:1px solid #e2eaf3}
+.cmp-table thead th:nth-child(2),.cmp-table thead th:nth-child(3){text-align:right}
+.cmp-table tbody tr{border-bottom:1px solid #f2f6fb}
+.cmp-table tbody td{padding:11px 16px;font-size:.9rem;color:#3a506e}
+.cmp-table tbody td:nth-child(2),.cmp-table tbody td:nth-child(3){text-align:right;font-weight:600;color:#1a2744}
+.cmp-table tbody tr.divider-row td{padding:0;height:5px;background:#f0f4f8;border:none}
+.cmp-table tbody tr.total-row td{padding:13px 16px;font-size:.95rem;font-weight:700;color:#1a2744;
+  border-top:2px solid #e2eaf3;background:#f8fafc}
+.cmp-table tfoot tr{background:linear-gradient(135deg,#0d5c35,#1a7a4a)}
+.cmp-table tfoot td{padding:15px 16px;font-size:.98rem;font-weight:700;color:#fff}
+.cmp-table tfoot td:nth-child(2){text-align:right;color:rgba(255,255,255,.5);font-size:.82rem;font-weight:400}
+.cmp-table tfoot td:nth-child(3){text-align:right;color:#7dffc1;font-size:1.1rem}
+.before-val{color:#c0392b}
+.after-val{color:#1a7a4a}
+.neutral-val{color:#5a7a9e}
+.ded-col{color:#c0392b;font-weight:600}
+
+/* ── STRATEGY GRID (2-column cards) ── */
+.strat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
+.strat-card{border:1.5px solid #e2eaf3;border-radius:11px;padding:16px 18px;
+  background:#f8fafc;transition:all .2s;position:relative}
+.strat-card.active{border-color:#b2cef0;background:#fff;box-shadow:0 2px 10px rgba(26,52,104,.07)}
+.sc-top{display:flex;gap:10px;margin-bottom:14px;align-items:flex-start}
+.sc-top input[type=checkbox]{width:17px;height:17px;margin-top:2px;accent-color:#1a3468;
+  cursor:pointer;flex-shrink:0}
+.sc-name{font-size:.91rem;font-weight:700;color:#1a2744;margin-bottom:3px}
+.sc-desc{font-size:.75rem;color:#7a9ab8;line-height:1.4}
+.sc-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  padding-top:12px;border-top:1px solid #edf2f8}
+.sc-field{display:flex;flex-direction:column;gap:5px}
+.sc-field-label{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#7a9ab8}
+.sc-ded-input{width:140px;text-align:right;border:1.5px solid #d8e3ef;border-radius:7px;
+  font-size:.88rem;font-weight:600;padding:7px 10px;outline:none;background:#edf2f8;
+  color:#1a2744;transition:border-color .2s;cursor:not-allowed;opacity:.5}
+.strat-card.active .sc-ded-input{background:#f8fafc;cursor:text;opacity:1}
+.strat-card.active .sc-ded-input:focus{border-color:#1a3468;background:#fff}
+.sc-ded-input::placeholder{color:#b0bec5;font-weight:400;font-size:.8rem}
+.sc-sav-val{font-size:1.05rem;font-weight:800;color:#1a7a4a;text-align:right;min-width:90px}
+.sc-sav-val.zero{color:#b0bec5;font-weight:500;font-size:.9rem}
+.sc-sav-val.neg{color:#c0392b}
+
+/* ── SUMMARY BANNER ── */
+.summary{display:grid;grid-template-columns:1fr 1fr 1fr;
+  background:linear-gradient(135deg,#0d1e3f 0%,#1a3468 100%);
+  border-radius:14px;box-shadow:0 6px 28px rgba(13,30,63,.3);overflow:hidden;margin-bottom:16px}
+.sum-block{padding:28px 24px;display:flex;flex-direction:column;align-items:center;
+  text-align:center;position:relative}
+.sum-block:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;
+  width:1px;background:rgba(255,255,255,.12)}
+.sum-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(255,255,255,.5);margin-bottom:10px}
+.sum-num{font-size:2rem;font-weight:800;line-height:1;letter-spacing:-.5px}
+.sum-sub{font-size:.72rem;color:rgba(255,255,255,.38);margin-top:8px}
+.sum-before .sum-num{color:#ff8a80}
+.sum-after .sum-num{color:#a8c4ff}
+.sum-save{background:rgba(255,255,255,.04)}
+.sum-save .sum-num{color:#4dffa0;font-size:2.2rem}
+
+/* ── DISCLAIMER & PDF BUTTON ── */
+.disclaimer{text-align:center;font-size:.71rem;color:#8fa8c4;padding:4px 0 20px}
+.pdf-row{display:flex;justify-content:center;padding-bottom:40px}
+.pdf-btn{display:flex;align-items:center;gap:10px;padding:14px 36px;
+  background:linear-gradient(135deg,#0d1e3f,#1a3468);color:#fff;border:none;
+  border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 16px rgba(13,30,63,.3);transition:all .2s;letter-spacing:.01em}
+.pdf-btn:hover{background:linear-gradient(135deg,#1a3468,#1e4d8c);
+  box-shadow:0 6px 20px rgba(13,30,63,.4);transform:translateY(-1px)}
+.pdf-btn:active{transform:translateY(0)}
+.pdf-btn svg{width:18px;height:18px;flex-shrink:0}
+
+/* ══════════════════════════════════════
+   PRINT STYLES
+══════════════════════════════════════ */
+@media print {
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+
+  body{background:#fff!important;font-size:10pt}
+  .main{max-width:100%;padding:0!important}
+
+  /* Hide screen-only elements */
+  .hdr{display:none!important}
+  .pdf-row{display:none!important}
+  .disclaimer{display:none!important}
+  .toggle-wrap{display:none!important}
+  .scorp-note{display:none!important}
+
+  /* Show print header */
+  .print-hdr{display:block!important;padding-bottom:16px;margin-bottom:20px;
+    border-bottom:2px solid #1a3468}
+  .print-hdr h1{font-size:1.4rem;font-weight:700;color:#1a2744;margin-bottom:4px}
+  .print-hdr .ph-meta{display:flex;justify-content:space-between;align-items:baseline}
+  .print-hdr .ph-client{font-size:1rem;font-weight:600;color:#1a3468}
+  .print-hdr .ph-date{font-size:.8rem;color:#7a9ab8}
+  .print-hdr .ph-sub{font-size:.8rem;color:#7a9ab8;margin-top:2px}
+
+  /* Compact spacing */
+  .card{box-shadow:none!important;border:1px solid #e2eaf3!important;
+    padding:16px 20px!important;margin-bottom:14px!important;border-radius:8px!important}
+  .scorp-card{box-shadow:none!important;border:1px solid #e2eaf3!important;
+    margin-bottom:14px!important;border-radius:8px!important}
+  .setup-row{margin-bottom:14px!important}
+  .slabel{margin-bottom:8px!important}
+
+  /* Ensure 2-col grids hold */
+  .setup-row{grid-template-columns:1fr 1fr!important}
+  .strat-grid{grid-template-columns:1fr 1fr!important;gap:8px!important;padding:10px!important}
+  .scorp-metrics{grid-template-columns:repeat(4,1fr)!important}
+  .income-amounts{grid-template-columns:1fr 1fr!important}
+  .summary{grid-template-columns:1fr 1fr 1fr!important}
+
+  /* Strategy cards */
+  .strat-card{break-inside:avoid;border-radius:6px!important;padding:12px!important}
+  .strat-card.active{border-color:#b2cef0!important;background:#fff!important}
+
+  /* Summary */
+  .summary{border-radius:8px!important;box-shadow:none!important;margin-bottom:0!important}
+
+  /* S-Corp body always visible if active */
+  .scorp-body.visible{display:block!important}
+
+  /* Chip group - show as inline text */
+  .chip-group .chip{border-radius:4px!important;padding:3px 8px!important;font-size:.78rem!important}
+
+  /* Page break hints */
+  .strat-grid{break-inside:avoid}
+  .summary{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- SCREEN HEADER -->
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="hdr-brand">
+      <div class="hdr-logo">
+        <img src="data:image/png;base64,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" alt="Xeva Ventures" style="height:60px;width:auto;display:block;">
+      </div>
+      <div>
+        <div class="hdr-company">Xeva Ventures</div>
+        <h1>Tax Savings Analysis</h1>
+        <p>2025 tax year &nbsp;·&nbsp; Optimized strategy projections</p>
+      </div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <label>Client Name</label>
+    <input class="client-inp" id="clientName" type="text" placeholder="Enter client name…" oninput="updatePrintHeader()"/>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PRINT HEADER (hidden on screen) -->
+  <div class="print-hdr">
+    <div class="ph-meta">
+      <div>
+        <h1>Tax Savings Analysis</h1>
+        <div class="ph-sub">2025 Tax Year &nbsp;·&nbsp; Optimized Strategy Projections</div>
+      </div>
+      <div style="text-align:right">
+        <div class="ph-client" id="ph-client-name"></div>
+        <div class="ph-date" id="ph-date"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETUP ── -->
+  <div class="setup-row">
+    <div class="card">
+      <div class="slabel" style="margin-top:0">Filing Status</div>
+      <div class="fil-wrap">
+        <div class="fil-btn active" id="fil-single" onclick="setFiling('single')">
+          <div class="ficon">👤</div>
+          <div><div class="ftitle">Single / Head of Household</div>
+               <div class="fsub">Standard deduction: $15,750</div></div>
+        </div>
+        <div class="fil-btn" id="fil-mfj" onclick="setFiling('mfj')">
+          <div class="ficon">👫</div>
+          <div><div class="ftitle">Married Filing Jointly</div>
+               <div class="fsub">Standard deduction: $31,500</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="right-setup">
+        <div class="inp-row">
+          <label>State</label>
+          <select id="stateSelect" onchange="recalc()">
+            <option value="">Select state…</option>
+            <option value="AL">Alabama (5.0%)</option><option value="AK">Alaska (0%)</option>
+            <option value="AZ">Arizona (2.5%)</option><option value="AR">Arkansas (4.7%)</option>
+            <option value="CA">California (9.3%)</option><option value="CO">Colorado (4.4%)</option>
+            <option value="CT">Connecticut (7.0%)</option><option value="DE">Delaware (6.6%)</option>
+            <option value="FL">Florida (0%)</option><option value="GA">Georgia (5.5%)</option>
+            <option value="HI">Hawaii (11.0%)</option><option value="ID">Idaho (5.8%)</option>
+            <option value="IL">Illinois (4.95%)</option><option value="IN">Indiana (3.15%)</option>
+            <option value="IA">Iowa (6.0%)</option><option value="KS">Kansas (5.7%)</option>
+            <option value="KY">Kentucky (4.5%)</option><option value="LA">Louisiana (4.25%)</option>
+            <option value="ME">Maine (7.15%)</option><option value="MD">Maryland (5.75%)</option>
+            <option value="MA">Massachusetts (5.0%)</option><option value="MI">Michigan (4.25%)</option>
+            <option value="MN">Minnesota (9.85%)</option><option value="MS">Mississippi (5.0%)</option>
+            <option value="MO">Missouri (4.95%)</option><option value="MT">Montana (6.75%)</option>
+            <option value="NE">Nebraska (6.84%)</option><option value="NV">Nevada (0%)</option>
+            <option value="NH">New Hampshire (0%)</option><option value="NJ">New Jersey (10.75%)</option>
+            <option value="NM">New Mexico (5.9%)</option><option value="NY">New York (10.9%)</option>
+            <option value="NC">North Carolina (4.75%)</option><option value="ND">North Dakota (2.5%)</option>
+            <option value="OH">Ohio (4.0%)</option><option value="OK">Oklahoma (4.75%)</option>
+            <option value="OR">Oregon (9.9%)</option><option value="PA">Pennsylvania (3.07%)</option>
+            <option value="RI">Rhode Island (5.99%)</option><option value="SC">South Carolina (7.0%)</option>
+            <option value="SD">South Dakota (0%)</option><option value="TN">Tennessee (0%)</option>
+            <option value="TX">Texas (0%)</option>
+            <option value="UT" selected>Utah (4.85%)</option>
+            <option value="VT">Vermont (8.75%)</option><option value="VA">Virginia (5.75%)</option>
+            <option value="WA">Washington (0%)</option><option value="WV">West Virginia (6.5%)</option>
+            <option value="WI">Wisconsin (7.65%)</option><option value="WY">Wyoming (0%)</option>
+          </select>
+        </div>
+        <div class="inp-row">
+          <label>Income Types <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ab0c8">(select all that apply)</span></label>
+          <div class="chip-group">
+            <div class="chip active" data-type="inc1099" onclick="toggleChip(this)"><div class="cdot"></div>1099 / Self-Employed</div>
+            <div class="chip" data-type="incW2"    onclick="toggleChip(this)"><div class="cdot"></div>W-2 / Employee</div>
+            <div class="chip" data-type="incRental" onclick="toggleChip(this)"><div class="cdot"></div>Rental Income</div>
+            <div class="chip" data-type="incGains"  onclick="toggleChip(this)"><div class="cdot"></div>Capital Gains</div>
+            <div class="chip" data-type="incOther"  onclick="toggleChip(this)"><div class="cdot"></div>Other Income</div>
+          </div>
+        </div>
+        <div class="income-amounts">
+          <div class="amt-group" id="grp-inc1099">
+            <label>Gross Business Income (1099)</label>
+            <input type="text" id="inc1099" placeholder="$0" oninput="recalc()"/>
+          </div>
+          <div class="amt-group" id="grp-incW2" style="display:none">
+            <label>W-2 Wages</label>
+            <input type="text" id="incW2" placeholder="$0" oninput="recalc()"/>
+          </div>
+          <div class="amt-group" id="grp-incRental" style="display:none">
+            <label>Rental Income</label>
+            <input type="text" id="incRental" placeholder="$0" oninput="recalc()"/>
+          </div>
+          <div class="amt-group" id="grp-incGains" style="display:none">
+            <label>Capital Gains</label>
+            <input type="text" id="incGains" placeholder="$0" oninput="recalc()"/>
+          </div>
+          <div class="amt-group" id="grp-incOther" style="display:none">
+            <label>Other Income</label>
+            <input type="text" id="incOther" placeholder="$0" oninput="recalc()"/>
+          </div>
+          <div class="amt-group">
+            <label>Tax Withheld / Prepaid</label>
+            <input type="text" id="withheld" placeholder="$0" oninput="recalc()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAX COMPARISON ── -->
+  <div class="slabel">Tax Liability: Before vs. After Strategies</div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:22px">
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th style="width:55%">Line Item</th>
+          <th>Before Strategies</th>
+          <th>After Strategies</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Gross Income</td>
+          <td class="neutral-val" id="c-gross-b">—</td>
+          <td class="neutral-val" id="c-gross-a">—</td>
+        </tr>
+        <tr>
+          <td>Strategy Deductions</td>
+          <td class="neutral-val">$0</td>
+          <td class="ded-col" id="c-bded-a">—</td>
+        </tr>
+        <tr>
+          <td>Net Business / SE Income</td>
+          <td id="c-senet-b">—</td>
+          <td class="after-val" id="c-senet-a">—</td>
+        </tr>
+        <tr class="divider-row"><td colspan="3"></td></tr>
+        <tr>
+          <td id="c-selabel-b">Self-Employment Tax <span style="font-size:.75rem;color:#9ab0c8">(15.3% on 92.35%)</span></td>
+          <td class="before-val" id="c-se-b">—</td>
+          <td class="after-val"  id="c-se-a">—</td>
+        </tr>
+        <tr id="c-seded-row">
+          <td>SE Tax Deduction <span style="font-size:.75rem;color:#9ab0c8">(50% above-line)</span></td>
+          <td class="neutral-val" id="c-seded-b">—</td>
+          <td class="neutral-val" id="c-seded-a">—</td>
+        </tr>
+        <tr id="c-dist-row" style="display:none">
+          <td>S-Corp Distribution <span style="font-size:.75rem;color:#9ab0c8">(no FICA)</span></td>
+          <td class="neutral-val" id="c-dist-b">—</td>
+          <td class="after-val"  id="c-dist-a">—</td>
+        </tr>
+        <tr>
+          <td>Adjusted Gross Income (AGI)</td>
+          <td id="c-agi-b">—</td>
+          <td class="after-val" id="c-agi-a">—</td>
+        </tr>
+        <tr>
+          <td id="c-stddedlabel">Standard Deduction</td>
+          <td class="neutral-val" id="c-stdded-b">—</td>
+          <td class="neutral-val" id="c-stdded-a">—</td>
+        </tr>
+        <tr>
+          <td>Taxable Income</td>
+          <td id="c-taxinc-b">—</td>
+          <td class="after-val" id="c-taxinc-a">—</td>
+        </tr>
+        <tr class="divider-row"><td colspan="3"></td></tr>
+        <tr>
+          <td>Federal Income Tax</td>
+          <td class="before-val" id="c-fed-b">—</td>
+          <td class="after-val"  id="c-fed-a">—</td>
+        </tr>
+        <tr>
+          <td>State Income Tax</td>
+          <td class="before-val" id="c-state-b">—</td>
+          <td class="after-val"  id="c-state-a">—</td>
+        </tr>
+        <tr>
+          <td>Tax Withheld / Prepaid</td>
+          <td class="neutral-val" id="c-wh-b">—</td>
+          <td class="neutral-val" id="c-wh-a">—</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total Tax Due</td>
+          <td class="before-val" id="c-total-b">—</td>
+          <td class="after-val"  id="c-total-a">—</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>💰 Estimated Tax Savings</td>
+          <td></td>
+          <td id="c-savings">—</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ── S-CORP ── -->
+  <div class="slabel">S-Corp Structure</div>
+  <div class="scorp-card" id="scorpCard">
+    <div class="scorp-header">
+      <div class="scorp-title">
+        <div class="scorp-icon">🏢</div>
+        <div>
+          <div class="scorp-name">S-Corp Election</div>
+          <div class="scorp-desc">Owner pays 15.3% FICA only on their salary — distributions bypass self-employment tax entirely</div>
+        </div>
+      </div>
+      <div class="toggle-wrap" onclick="toggleScorp()">
+        <span class="toggle-label" id="scorpLabel">Off</span>
+        <label class="toggle" onclick="event.stopPropagation()">
+          <input type="checkbox" id="scorpToggle" onchange="toggleScorp()"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="scorp-body" id="scorpBody">
+      <div class="scorp-inputs">
+        <div class="scorp-sal-grp">
+          <label>Owner Salary</label>
+          <input type="text" id="scorpSalary" placeholder="$0" oninput="recalc()"/>
+        </div>
+        <div class="scorp-note">
+          Set a <strong>reasonable salary</strong> for the role. The IRS requires S-Corp owners to pay a fair market wage — savings come from remaining income flowing as a <em>distribution</em>, free of self-employment tax.
+        </div>
+      </div>
+      <div class="scorp-metrics">
+        <div class="scorp-metric">
+          <div class="sm-label">SE Tax Without S-Corp</div>
+          <div class="sm-val red" id="sm-se-before">—</div>
+        </div>
+        <div class="scorp-metric">
+          <div class="sm-label">FICA on Salary</div>
+          <div class="sm-val" id="sm-fica">—</div>
+        </div>
+        <div class="scorp-metric">
+          <div class="sm-label">Distributions (No FICA)</div>
+          <div class="sm-val" id="sm-dist">—</div>
+        </div>
+        <div class="scorp-metric highlight">
+          <div class="sm-label">S-Corp Tax Savings</div>
+          <div class="sm-val green" id="sm-savings">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STRATEGIES (2-column grid) ── -->
+  <div class="slabel">Additional Tax Strategies</div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:22px">
+    <div class="strat-grid" id="stratGrid">
+
+      <!-- 1 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Vehicle Depreciation</div>
+            <div class="sc-desc">Section 179 / bonus depreciation on a qualifying business vehicle</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="strat-card" data-type="retirement">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Solo 401(k) / SEP-IRA</div>
+            <div class="sc-desc">Pre-tax retirement contributions — above-the-line deduction, does not reduce SE tax</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Contribution Amount</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Cost Segregation Study</div>
+            <div class="sc-desc">Accelerated depreciation on real estate holdings through component reclassification</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Home Office Deduction</div>
+            <div class="sc-desc">Dedicated workspace used regularly and exclusively for business</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Accountable Plan</div>
+            <div class="sc-desc">Reimburse business expenses tax-free through the S-Corp with proper documentation</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Paying Family Members</div>
+            <div class="sc-desc">Legitimately shift income to lower-bracket family employees for real services rendered</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Augusta Rule (Section 280A)</div>
+            <div class="sc-desc">Rent your home to your business up to 14 days/year — income received is tax-free to you</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Restructured Spending</div>
+            <div class="sc-desc">Convert personal or mixed-use expenses into legitimate, documented business deductions</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10 -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Org Restructuring</div>
+            <div class="sc-desc">Optimize entity structure (LLC, holding company, partnership) for maximum tax efficiency</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11 MILEAGE -->
+      <div class="strat-card" data-type="mileage">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Mileage Deduction</div>
+            <div class="sc-desc">Deduct $0.70/mile for all qualifying business driving — 2025 IRS standard mileage rate</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field" style="flex:1">
+            <div class="sc-field-label">Business Miles Driven</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter miles…" oninput="recalc()" disabled/>
+            <div class="sc-miles-calc" style="font-size:.71rem;color:#5a7a9e;margin-top:4px;min-height:1.1em;font-weight:600;">—</div>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12 BUSINESS EXPENSES -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">Business Expenses</div>
+            <div class="sc-desc">Ordinary and necessary business expenses — software, supplies, professional services, travel, marketing, and more</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deduction Added</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 13 0% INTEREST BUSINESS CAPITAL -->
+      <div class="strat-card" data-type="biz">
+        <div class="sc-top">
+          <input type="checkbox" onchange="activateCard(this);recalc()"/>
+          <div>
+            <div class="sc-name">0% Interest Business Capital</div>
+            <div class="sc-desc">Access business capital at 0% APR — deploy interest-free financing into fully deductible business investments</div>
+          </div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-field">
+            <div class="sc-field-label">Deductible Amount</div>
+            <input class="sc-ded-input" type="text" placeholder="Enter amount…" oninput="recalc()" disabled/>
+          </div>
+          <div class="sc-field" style="align-items:flex-end">
+            <div class="sc-field-label">Tax Savings</div>
+            <div class="sc-sav-val zero">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /strat-grid -->
+  </div>
+
+  <!-- ── SUMMARY ── -->
+  <div class="slabel">Summary</div>
+  <div class="summary">
+    <div class="sum-block sum-before">
+      <div class="sum-label">Tax Without Strategies</div>
+      <div class="sum-num" id="s-before">$—</div>
+      <div class="sum-sub">Current estimated tax burden</div>
+    </div>
+    <div class="sum-block sum-after">
+      <div class="sum-label">Tax With Strategies</div>
+      <div class="sum-num" id="s-after">$—</div>
+      <div class="sum-sub">After all selected strategies</div>
+    </div>
+    <div class="sum-block sum-save">
+      <div class="sum-label">You Save</div>
+      <div class="sum-num" id="s-save">$—</div>
+      <div class="sum-sub">Estimated annual tax savings</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    For illustrative purposes only &nbsp;·&nbsp; 2025 tax year &nbsp;·&nbsp;
+    Individual results will vary &nbsp;·&nbsp; Consult a qualified tax professional before implementing any strategies
+  </div>
+
+  <!-- ── GENERATE PDF BUTTON ── -->
+  <div class="pdf-row">
+    <button class="pdf-btn" onclick="generatePDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="12" y1="18" x2="12" y2="12"/>
+        <line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+      Generate PDF Report
+    </button>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════
+// 2025 TAX ENGINE
+// ══════════════════════════════════════════════
+
+// 2025 Federal Tax Brackets (IRS Rev. Proc. 2024-40)
+const FED_BRACKETS = {
+  single:[
+    {max:11925,   rate:.10},{max:48475,   rate:.12},{max:103350,  rate:.22},
+    {max:197300,  rate:.24},{max:250525,  rate:.32},{max:626350,  rate:.35},
+    {max:Infinity,rate:.37}
+  ],
+  mfj:[
+    {max:23850,   rate:.10},{max:96950,   rate:.12},{max:206700,  rate:.22},
+    {max:394600,  rate:.24},{max:501050,  rate:.32},{max:751600,  rate:.35},
+    {max:Infinity,rate:.37}
+  ]
+};
+
+// 2025 Standard Deductions
+const STD_DED = {single:15750, mfj:31500};
+
+// State income tax rates (simplified / illustrative)
+const STATE_RATE = {
+  AL:.05,AK:0,AZ:.025,AR:.047,CA:.093,CO:.044,CT:.07,DE:.066,FL:0,GA:.055,
+  HI:.11,ID:.058,IL:.0495,IN:.0315,IA:.06,KS:.057,KY:.045,LA:.0425,ME:.0715,
+  MD:.0575,MA:.05,MI:.0425,MN:.0985,MS:.05,MO:.0495,MT:.0675,NE:.0684,NV:0,
+  NH:0,NJ:.1075,NM:.059,NY:.109,NC:.0475,ND:.025,OH:.0399,OK:.0475,OR:.099,
+  PA:.0307,RI:.0599,SC:.07,SD:0,TN:0,TX:0,UT:.0485,VT:.0875,VA:.0575,
+  WA:0,WV:.065,WI:.0765,WY:0
+};
+
+function fedTax(taxable, filing) {
+  if (taxable <= 0) return 0;
+  const B = FED_BRACKETS[filing];
+  let tax = 0, prev = 0;
+  for (const b of B) {
+    if (taxable <= prev) break;
+    tax += (Math.min(taxable, b.max) - prev) * b.rate;
+    prev = b.max;
+  }
+  return tax;
+}
+
+function calcTaxes({
+  inc1099, incW2, incRental, incGains, incOther,
+  filing, stateCode, bizDed, aboveDed, withheld,
+  scorpOn, scorpSalary
+}) {
+  const sr  = STATE_RATE[stateCode] || 0;
+  const std = STD_DED[filing];
+
+  let seTax=0, seDed=0, ficaTax=0, agi, seNet, distribution=0;
+
+  if (scorpOn && scorpSalary > 0 && inc1099 > 0) {
+    // ── S-CORP: FICA on salary only; distributions bypass FICA ──
+    seNet = Math.max(0, inc1099 - bizDed);
+    const salary       = Math.min(scorpSalary, seNet);
+    const employerFICA = salary * 0.0765;
+    ficaTax            = salary * 0.153;          // total FICA (both halves)
+    distribution       = Math.max(0, seNet - salary - employerFICA);
+    // Income for tax: salary (W-2) + distribution + other income
+    // Employer FICA already removed from distribution (deducted at corp level)
+    agi = salary + distribution + incW2 + incRental + incGains + incOther - aboveDed;
+  } else {
+    // ── SOLE PROP / 1099 ──
+    seNet = Math.max(0, inc1099 - bizDed);
+    seTax = seNet * 0.9235 * 0.153;
+    seDed = seTax * 0.5;
+    agi   = seNet + incW2 + incRental + incGains + incOther - seDed - aboveDed;
+  }
+
+  const taxableInc = Math.max(0, agi - std);
+  const fedT       = fedTax(taxableInc, filing);
+  const stateT     = taxableInc * sr;
+  const totalGross = seTax + ficaTax + fedT + stateT;
+  const totalDue   = Math.max(0, totalGross - withheld);
+
+  return { seNet, seTax, ficaTax, seDed, distribution, agi, stdDed:std,
+           taxableInc, fedT, stateT, totalGross, totalDue };
+}
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let filing = 'single';
+let scorpEnabled = false;
+
+function getV(id) {
+  const v = (document.getElementById(id)?.value||'').replace(/[$,\s]/g,'');
+  return parseFloat(v) || 0;
+}
+
+function getBaseInputs(overrideBiz, overrideAbove) {
+  let biz=0, above=0;
+  if (overrideBiz === undefined) {
+    document.querySelectorAll('.strat-card').forEach(card => {
+      const cb  = card.querySelector('input[type=checkbox]');
+      const inp = card.querySelector('.sc-ded-input');
+      if (!cb?.checked || !inp) return;
+      let v = parseFloat((inp.value||'').replace(/[$,\s]/g,''))||0;
+      if (card.dataset.type === 'mileage') v = v * 0.70; // miles × $0.70/mi
+      if (card.dataset.type === 'retirement') above += v;
+      else biz += v;
+    });
+  } else { biz=overrideBiz||0; above=overrideAbove||0; }
+
+  return {
+    inc1099:   getV('inc1099'),
+    incW2:     getV('incW2'),
+    incRental: getV('incRental'),
+    incGains:  getV('incGains'),
+    incOther:  getV('incOther'),
+    filing, stateCode: document.getElementById('stateSelect').value,
+    withheld:  getV('withheld'),
+    bizDed: biz, aboveDed: above,
+    scorpOn: scorpEnabled, scorpSalary: getV('scorpSalary')
+  };
+}
+
+function fmt(n) {
+  if (n===null||isNaN(n)) return '—';
+  return '$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0});
+}
+function setEl(id, txt) { const e=document.getElementById(id); if(e) e.textContent=txt; }
+
+// ══════════════════════════════════════════════
+// RECALC
+// ══════════════════════════════════════════════
+function recalc() {
+  const base     = getBaseInputs();
+  const origGross = base.inc1099+base.incW2+base.incRental+base.incGains+base.incOther;
+  const hasInc    = origGross > 0;
+  const em        = '—';
+
+  const before = calcTaxes({...base, bizDed:0, aboveDed:0, scorpOn:false, scorpSalary:0});
+  const after  = calcTaxes(base);
+
+  // S-Corp metrics
+  const sc = getV('scorpSalary');
+  if (scorpEnabled && sc > 0 && base.inc1099 > 0) {
+    const seNet0    = Math.max(0, base.inc1099 - (base.bizDed||0));
+    const salary    = Math.min(sc, seNet0);
+    const seBefore  = seNet0 * 0.9235 * 0.153;
+    const ficaAmt   = salary * 0.153;
+    const dist      = Math.max(0, seNet0 - salary - salary*0.0765);
+    const withS     = calcTaxes({...base, scorpOn:true});
+    const withoutS  = calcTaxes({...base, scorpOn:false, scorpSalary:0});
+    const scorpSav  = withoutS.totalGross - withS.totalGross;
+
+    setEl('sm-se-before', hasInc ? fmt(seBefore) : em);
+    setEl('sm-fica',      hasInc ? fmt(ficaAmt)  : em);
+    setEl('sm-dist',      hasInc ? fmt(dist)      : em);
+    const savEl = document.getElementById('sm-savings');
+    if (hasInc) {
+      savEl.textContent = (scorpSav<0?'-':'')+fmt(Math.abs(scorpSav));
+      savEl.className = 'sm-val '+(scorpSav<0?'red':'green');
+    } else { savEl.textContent=em; savEl.className='sm-val green'; }
+  }
+
+  // Comparison table
+  setEl('c-gross-b', hasInc ? fmt(origGross) : em);
+  setEl('c-gross-a', hasInc ? fmt(origGross) : em);
+  const totalDed = base.bizDed + base.aboveDed;
+  setEl('c-bded-a', hasInc && totalDed>0 ? '-'+fmt(totalDed) : em);
+  setEl('c-senet-b', hasInc ? fmt(before.seNet) : em);
+  setEl('c-senet-a', hasInc ? fmt(after.seNet)  : em);
+
+  const selLabel = document.getElementById('c-selabel-b');
+  if (scorpEnabled && sc > 0) {
+    selLabel.innerHTML='FICA on Owner Salary <span style="font-size:.75rem;color:#9ab0c8">(15.3% on salary)</span>';
+  } else {
+    selLabel.innerHTML='Self-Employment Tax <span style="font-size:.75rem;color:#9ab0c8">(15.3% on 92.35%)</span>';
+  }
+
+  setEl('c-se-b', hasInc ? fmt(before.seTax+before.ficaTax) : em);
+  setEl('c-se-a', hasInc ? fmt(after.seTax +after.ficaTax)  : em);
+
+  const sededRow = document.getElementById('c-seded-row');
+  const distRow  = document.getElementById('c-dist-row');
+  if (scorpEnabled && sc > 0) {
+    sededRow.style.display='none'; distRow.style.display='';
+    setEl('c-dist-b', hasInc ? fmt(before.distribution) : em);
+    setEl('c-dist-a', hasInc ? fmt(after.distribution)  : em);
+  } else {
+    sededRow.style.display=''; distRow.style.display='none';
+    setEl('c-seded-b', hasInc && before.seDed>0 ? '('+fmt(before.seDed)+')' : em);
+    setEl('c-seded-a', hasInc && after.seDed >0 ? '('+fmt(after.seDed) +')' : em);
+  }
+
+  setEl('c-agi-b', hasInc ? fmt(before.agi) : em);
+  setEl('c-agi-a', hasInc ? fmt(after.agi)  : em);
+  document.getElementById('c-stddedlabel').textContent =
+    'Standard Deduction ('+(filing==='single'?'Single':'MFJ')+')';
+  setEl('c-stdded-b', hasInc ? '('+fmt(before.stdDed)+')' : em);
+  setEl('c-stdded-a', hasInc ? '('+fmt(after.stdDed) +')' : em);
+  setEl('c-taxinc-b', hasInc ? fmt(before.taxableInc) : em);
+  setEl('c-taxinc-a', hasInc ? fmt(after.taxableInc)  : em);
+  setEl('c-fed-b',   hasInc ? fmt(before.fedT)   : em);
+  setEl('c-fed-a',   hasInc ? fmt(after.fedT)    : em);
+  setEl('c-state-b', hasInc ? fmt(before.stateT) : em);
+  setEl('c-state-a', hasInc ? fmt(after.stateT)  : em);
+  const wh = base.withheld;
+  setEl('c-wh-b', hasInc && wh>0 ? '('+fmt(wh)+')' : em);
+  setEl('c-wh-a', hasInc && wh>0 ? '('+fmt(wh)+')' : em);
+  setEl('c-total-b', hasInc ? fmt(before.totalDue) : em);
+  setEl('c-total-a', hasInc ? fmt(after.totalDue)  : em);
+  const savings = hasInc ? Math.max(0, before.totalDue - after.totalDue) : 0;
+  setEl('c-savings', hasInc && savings>0 ? fmt(savings) : em);
+
+  // Strategy cards
+  document.querySelectorAll('.strat-card').forEach(card => {
+    const cb      = card.querySelector('input[type=checkbox]');
+    const inp     = card.querySelector('.sc-ded-input');
+    const savDiv  = card.querySelector('.sc-sav-val');
+    if (!cb||!inp||!savDiv) return;
+
+    inp.disabled = !cb.checked;
+    const mileCalc = card.querySelector('.sc-miles-calc');
+    if (!cb.checked || !inp.value.trim()) {
+      savDiv.textContent='—'; savDiv.className='sc-sav-val zero';
+      if (mileCalc) mileCalc.textContent='—';
+      return;
+    }
+    let dedVal = parseFloat((inp.value||'').replace(/[$,\s]/g,''))||0;
+    // Mileage: convert miles to dollar deduction at $0.70/mi
+    if (card.dataset.type === 'mileage') {
+      const dollarDed = dedVal * 0.70;
+      if (mileCalc) mileCalc.textContent = dedVal > 0 ? '= ' + fmt(dollarDed) + ' deduction' : '—';
+      dedVal = dollarDed;
+    } else if (mileCalc) { mileCalc.textContent='—'; }
+    if (dedVal<=0) { savDiv.textContent='—'; savDiv.className='sc-sav-val zero'; return; }
+
+    // Marginal savings (standalone, vs. no strategies, same S-Corp state)
+    const baseNoStrat = {...base, bizDed:0, aboveDed:0};
+    const txB = calcTaxes(baseNoStrat);
+    const txA = card.dataset.type==='retirement'
+      ? calcTaxes({...baseNoStrat, aboveDed:dedVal})
+      : calcTaxes({...baseNoStrat, bizDed:dedVal});
+    const stratSav = txB.totalGross - txA.totalGross;
+
+    if (stratSav < 0) { savDiv.textContent='-'+fmt(Math.abs(stratSav)); savDiv.className='sc-sav-val neg'; }
+    else if (stratSav===0) { savDiv.textContent='$0'; savDiv.className='sc-sav-val zero'; }
+    else { savDiv.textContent=fmt(stratSav); savDiv.className='sc-sav-val'; }
+  });
+
+  // Summary
+  setEl('s-before', hasInc ? fmt(before.totalDue) : '$—');
+  setEl('s-after',  hasInc ? fmt(after.totalDue)  : '$—');
+  setEl('s-save',   hasInc && savings>0 ? fmt(savings) : '$—');
+}
+
+// ══════════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════════
+function setFiling(f) {
+  filing = f;
+  document.getElementById('fil-single').classList.toggle('active', f==='single');
+  document.getElementById('fil-mfj').classList.toggle('active', f==='mfj');
+  recalc();
+}
+
+function toggleChip(chip) {
+  chip.classList.toggle('active');
+  const grp = document.getElementById('grp-'+chip.dataset.type);
+  if (grp) {
+    grp.style.display = chip.classList.contains('active') ? 'flex' : 'none';
+    if (!chip.classList.contains('active')) { const i=grp.querySelector('input'); if(i) i.value=''; }
+  }
+  recalc();
+}
+
+function activateCard(cb) {
+  const card = cb.closest('.strat-card');
+  if (!card) return;
+  card.classList.toggle('active', cb.checked);
+  const inp = card.querySelector('.sc-ded-input');
+  if (inp) inp.disabled = !cb.checked;
+  if (!cb.checked && inp) { inp.value=''; }
+}
+
+function toggleScorp() {
+  scorpEnabled = document.getElementById('scorpToggle').checked;
+  document.getElementById('scorpLabel').textContent = scorpEnabled ? 'On' : 'Off';
+  document.getElementById('scorpLabel').className = 'toggle-label'+(scorpEnabled?' on':'');
+  document.getElementById('scorpBody').classList.toggle('visible', scorpEnabled);
+  document.getElementById('scorpCard').classList.toggle('active', scorpEnabled);
+  if (!scorpEnabled) {
+    ['sm-se-before','sm-fica','sm-dist','sm-savings'].forEach(id=>setEl(id,'—'));
+    document.getElementById('sm-savings').className='sm-val green';
+  }
+  recalc();
+}
+
+function updatePrintHeader() {
+  const name = document.getElementById('clientName').value.trim() || 'Client';
+  setEl('ph-client-name', 'Prepared for: '+name);
+}
+
+function generatePDF() {
+  const name = document.getElementById('clientName').value.trim() || 'Client';
+  setEl('ph-client-name', 'Prepared for: '+name);
+  setEl('ph-date', new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}));
+  window.print();
+}
+
+recalc();
+</script>
+</body>
+</html>
